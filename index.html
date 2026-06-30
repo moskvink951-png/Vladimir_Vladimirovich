@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Владимиру Владимировичу — с днём рождения</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink: #15161A;
+    --ink-soft: #2A2B30;
+    --paper: #F3EEE3;
+    --paper-dim: #E8E1D2;
+    --crimson: #A8332A;
+    --crimson-soft: #C24B3F;
+    --gold: #C19A4B;
+    --sage: #7A8B6F;
+    --line: rgba(21,22,26,0.14);
+    --line-paper: rgba(243,238,227,0.18);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Inter', sans-serif;
+    overflow-x:hidden;
+    min-height:100vh;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
+  }
+
+  /* ---------- texture ---------- */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:5; opacity:0.035; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- particles canvas ---------- */
+  #fx{ position:fixed; inset:0; pointer-events:none; z-index:40; }
+
+  /* ============ COVER / SEAL ============ */
+  #cover{
+    position:fixed; inset:0; z-index:50;
+    display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(ellipse at 50% 35%, #1c1d22 0%, var(--ink) 65%);
+    cursor:pointer;
+    transition: opacity 1s ease, visibility 1s ease;
+  }
+  #cover.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+
+  .seal-wrap{
+    display:flex; flex-direction:column; align-items:center; gap:34px;
+    transform: translateY(0);
+  }
+
+  .seal{
+    width:148px; height:148px; border-radius:50%;
+    border:1.5px solid rgba(193,154,75,0.55);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    transition: transform 0.6s cubic-bezier(.2,.7,.3,1.2), border-color 0.6s ease;
+  }
+  .seal::before{
+    content:''; position:absolute; inset:10px; border-radius:50%;
+    border:1px solid rgba(193,154,75,0.3);
+  }
+  .seal-wrap:hover .seal{ transform: scale(1.04) rotate(2deg); border-color: rgba(193,154,75,0.9); }
+
+  .seal svg{ width:72px; height:72px; }
+
+  .cover-label{
+    font-family:'Noto Serif', serif; font-weight:600; font-size:15px;
+    letter-spacing:0.32em; text-transform:uppercase; color: var(--paper);
+    opacity:0.78; text-align:center;
+  }
+  .cover-sub{
+    font-family:'JetBrains Mono', monospace; font-size:11.5px; letter-spacing:0.18em;
+    color: var(--gold); text-transform:uppercase; opacity:0.85; text-align:center;
+  }
+
+  .knot-line{
+    width:1px; height:46px; background: linear-gradient(to bottom, transparent, rgba(193,154,75,0.6));
+  }
+
+  /* ============ MAIN CONTENT ============ */
+  #content{
+    position:relative; z-index:1;
+    opacity:0; transition: opacity 1.2s ease 0.2s;
+  }
+  #content.show{ opacity:1; }
+
+  .wrap{ max-width:760px; margin:0 auto; padding: 0 28px; }
+
+  /* ---- header / hero ---- */
+  .hero{
+    min-height:92vh;
+    display:flex; flex-direction:column; justify-content:center;
+    position:relative;
+    border-bottom:1px solid var(--line-paper);
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.22em;
+    color: var(--gold); text-transform:uppercase; margin-bottom:28px;
+    opacity:0; transform: translateY(10px);
+  }
+
+  .hero h1{
+    font-family:'Noto Serif', serif; font-weight:700;
+    font-size: clamp(40px, 8vw, 84px);
+    line-height:1.04; letter-spacing:-0.01em;
+    color: var(--paper);
+    opacity:0; transform: translateY(16px);
+  }
+  .hero h1 em{
+    font-style:italic; color: var(--crimson-soft); font-weight:400;
+  }
+
+  .hero-rule{
+    width:64px; height:2px; background: var(--crimson); margin:34px 0 26px;
+    opacity:0; transform: scaleX(0); transform-origin:left;
+  }
+
+  .hero p.lede{
+    font-family:'Noto Serif', serif; font-style:italic; font-weight:400;
+    font-size: clamp(17px, 2.4vw, 21px); line-height:1.65;
+    color: rgba(243,238,227,0.82); max-width:520px;
+    opacity:0; transform: translateY(12px);
+  }
+
+  .scroll-cue{
+    position:absolute; bottom:38px; left:28px;
+    display:flex; align-items:center; gap:10px;
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.14em;
+    color: rgba(243,238,227,0.45); text-transform:uppercase;
+    opacity:0;
+  }
+  .scroll-cue .arrow{ animation: bob 1.8s ease-in-out infinite; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(5px);} }
+
+  /* ---- section shell ---- */
+  section{ padding: 96px 0; border-bottom:1px solid var(--line-paper); }
+  section:last-of-type{ border-bottom:none; }
+
+  .section-tag{
+    font-family:'JetBrains Mono', monospace; font-size:11.5px; letter-spacing:0.2em;
+    text-transform:uppercase; color: var(--sage); margin-bottom:18px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .section-tag::before{
+    content:''; width:22px; height:1px; background: var(--sage);
+  }
+
+  .reveal{ opacity:0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(.2,.6,.2,1), transform 0.9s cubic-bezier(.2,.6,.2,1); }
+  .reveal.in{ opacity:1; transform: translateY(0); }
+  .reveal.d1{ transition-delay:0.08s; }
+  .reveal.d2{ transition-delay:0.16s; }
+  .reveal.d3{ transition-delay:0.24s; }
+  .reveal.d4{ transition-delay:0.32s; }
+
+  /* ---- message ---- */
+  .message h2{
+    font-family:'Noto Serif', serif; font-weight:600; font-size: clamp(26px,4vw,38px);
+    line-height:1.3; margin-bottom:28px; color: var(--paper);
+  }
+  .message p{
+    font-size:17px; line-height:1.85; color: rgba(243,238,227,0.86);
+    max-width:620px; margin-bottom:20px;
+  }
+  .message p:last-child{ margin-bottom:0; }
+  .message .sign{
+    margin-top:36px; font-family:'Noto Serif', serif; font-style:italic;
+    color: var(--gold); font-size:18px;
+  }
+
+  /* ---- ledger / facts (training log style) ---- */
+  .ledger{ position:relative; }
+  .ledger-title{
+    font-family:'Noto Serif', serif; font-weight:600; font-size: clamp(24px,3.6vw,32px);
+    margin-bottom:48px; color: var(--paper);
+  }
+
+  .ledger-row{
+    display:grid; grid-template-columns: 96px 1fr; gap:24px;
+    padding: 26px 0; border-top:1px solid var(--line-paper);
+    align-items:baseline;
+  }
+  .ledger-row:last-child{ border-bottom:1px solid var(--line-paper); }
+
+  .ledger-year{
+    font-family:'JetBrains Mono', monospace; font-size:14px; color: var(--gold);
+    letter-spacing:0.04em;
+  }
+  .ledger-body strong{
+    display:block; font-family:'Noto Serif', serif; font-weight:600; font-size:18px;
+    color: var(--paper); margin-bottom:6px;
+  }
+  .ledger-body span{
+    font-size:14.5px; line-height:1.6; color: rgba(243,238,227,0.65);
+  }
+
+  /* ---- photo frame ---- */
+  .photo-section{ text-align:center; }
+  .photo-frame{
+    margin: 0 auto; max-width:420px;
+    border:1px solid var(--line-paper);
+    padding:18px;
+    position:relative;
+  }
+  .photo-frame::before, .photo-frame::after{
+    content:''; position:absolute; width:18px; height:18px; border: 1.5px solid var(--gold);
+  }
+  .photo-frame::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
+  .photo-frame::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
+
+  .photo-slot{
+    aspect-ratio: 4/5; width:100%;
+    background: var(--paper-dim);
+    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+    color: var(--ink); position:relative; overflow:hidden;
+  }
+  .photo-slot img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
+  .photo-slot.has-img img{ display:block; }
+  .photo-slot.has-img .placeholder-ui{ display:none; }
+
+  .placeholder-ui{ display:flex; flex-direction:column; align-items:center; gap:12px; padding:24px; }
+  .placeholder-ui svg{ width:38px; height:38px; opacity:0.5; }
+  .placeholder-ui span{ font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; opacity:0.55; }
+  .photo-upload-btn{
+    margin-top:6px; font-family:'Inter', sans-serif; font-size:13px; font-weight:600;
+    color: var(--crimson); background:none; border:1px solid var(--crimson); padding:9px 18px;
+    cursor:pointer; transition: all 0.25s ease; letter-spacing:0.02em;
+  }
+  .photo-upload-btn:hover{ background: var(--crimson); color: var(--paper); }
+  .photo-caption{
+    margin-top:18px; font-family:'Noto Serif', serif; font-style:italic; font-size:14.5px;
+    color: rgba(243,238,227,0.55);
+  }
+  #photoInput{ display:none; }
+
+  /* ---- wishes / closing ---- */
+  .closing{ text-align:left; }
+  .closing-mark{
+    width:40px; height:40px; margin-bottom:28px;
+  }
+  .closing h2{
+    font-family:'Noto Serif', serif; font-weight:700; font-size: clamp(28px,4.4vw,44px);
+    line-height:1.25; color: var(--paper); max-width:600px;
+  }
+  .closing h2 em{ font-style:italic; color: var(--crimson-soft); }
+
+  .closing-from{
+    margin-top:52px; padding-top:28px; border-top:1px solid var(--line-paper);
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.14em;
+    text-transform:uppercase; color: rgba(243,238,227,0.5);
+  }
+
+  footer{ padding: 40px 0 56px; text-align:center; }
+  footer span{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.16em;
+    color: rgba(243,238,227,0.3); text-transform:uppercase;
+  }
+
+  /* ---- animated karate fighter sides ---- */
+  .fighter-side{
+    position:fixed; top:50%; transform:translateY(-50%);
+    pointer-events:none; z-index:2;
+    opacity:0; transition: opacity 1.6s ease 1s;
+    display:flex; flex-direction:column; align-items:center; gap:16px;
+  }
+  .fighter-side.left{ left:8px; }
+  .fighter-side.right{ right:0px; }
+  .fighter-side.show{ opacity:1; }
+
+  .fighter-side img{
+    filter: drop-shadow(0 0 12px rgba(193,154,75,0.25));
+  }
+  .fighter-side.right img{
+    transform: scaleX(-1);
+  }
+  .fighter-label{
+    font-family:'JetBrains Mono', monospace; font-size:9px; letter-spacing:0.18em;
+    text-transform:uppercase; color:rgba(193,154,75,0.5); text-align:center;
+  }
+
+  /* cover confetti canvas */
+  #cover-fx{
+    position:absolute; inset:0; pointer-events:none; z-index:1;
+  }
+
+  /* cover radial shimmer */
+  #cover::after{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background: radial-gradient(ellipse 60% 40% at 50% 50%, rgba(193,154,75,0.06) 0%, transparent 70%);
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  @keyframes pulse-glow{
+    0%,100%{ opacity:0.6; } 50%{ opacity:1; }
+  }
+
+  /* floating stars on cover */
+  .cover-stars{
+    position:absolute; inset:0; pointer-events:none; overflow:hidden;
+  }
+  .star{
+    position:absolute; width:4px; height:4px; border-radius:50%;
+    background: var(--gold); opacity:0;
+    animation: twinkle var(--d, 3s) ease-in-out var(--delay, 0s) infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{ opacity:0; transform:scale(0.5); }
+    50%{ opacity:0.7; transform:scale(1.2); }
+  }
+
+  @media (max-width:900px){
+    .fighter-side{ display:none; }
+  }
+
+  /* ---- corner logos ---- */
+  .corner-logo{
+    position:fixed; top:20px; z-index:10;
+    pointer-events:none;
+    opacity:0; transition: opacity 1.4s ease 1s;
+  }
+  .corner-logo.cl-left{ left:20px; }
+  .corner-logo.cl-right{ right:20px; }
+  .corner-logo.show{ opacity:1; }
+  .corner-logo img{
+    width:72px; height:72px; object-fit:contain; border-radius:50%;
+    filter: drop-shadow(0 0 8px rgba(193,154,75,0.4));
+  }
+
+  /* ---- carousel ---- */
+  .carousel{
+    position:relative; max-width:420px; margin:0 auto; overflow:hidden;
+  }
+  .carousel-track{
+    display:flex; transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .carousel-track img{
+    width:100%; flex-shrink:0; aspect-ratio:4/5; object-fit:cover; display:block;
+  }
+  .carousel-btn{
+    position:absolute; top:50%; transform:translateY(-50%);
+    background: rgba(21,22,26,0.6); border:1px solid rgba(193,154,75,0.5);
+    color: var(--gold); width:38px; height:38px; border-radius:50%;
+    font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition: background 0.2s, border-color 0.2s; z-index:2;
+  }
+  .carousel-btn:hover{ background: rgba(193,154,75,0.2); border-color: var(--gold); }
+  .carousel-btn.prev{ left:10px; }
+  .carousel-btn.next{ right:10px; }
+  .carousel-dots{
+    display:flex; justify-content:center; gap:8px; margin-top:14px;
+  }
+  .carousel-dots span{
+    width:7px; height:7px; border-radius:50%;
+    background: rgba(193,154,75,0.3); cursor:pointer; transition: background 0.25s;
+  }
+  .carousel-dots span.active{ background: var(--gold); }
+
+  @media (max-width:560px){
+    .ledger-row{ grid-template-columns: 64px 1fr; gap:14px; }
+    section{ padding:72px 0; }
+    .hero{ min-height:88vh; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<canvas id="fx"></canvas>
+
+<!-- CORNER LOGOS -->
+<div class="corner-logo cl-left" id="logoLeft">
+  <img src="logo_2.jpg" alt="Логотип клуба">
+</div>
+<div class="corner-logo cl-right" id="logoRight">
+  <img src="logo_2.jpg" alt="Логотип клуба">
+</div>
+
+<!-- COVER -->
+<div id="cover">
+  <canvas id="cover-fx"></canvas>
+
+  <!-- floating stars -->
+  <div class="cover-stars" id="coverStars"></div>
+
+  <div class="seal-wrap">
+    <div class="seal">
+      <svg viewBox="0 0 100 100" fill="none">
+        <!-- stylized knot / belt mon -->
+        <circle cx="50" cy="50" r="3" fill="#C19A4B"/>
+        <path d="M50 14 C 64 14, 76 26, 76 40 C 76 52, 66 58, 56 56 C 48 54, 46 46, 52 42 C 56 39, 60 42, 58 47"
+              stroke="#C19A4B" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M50 86 C 36 86, 24 74, 24 60 C 24 48, 34 42, 44 44 C 52 46, 54 54, 48 58 C 44 61, 40 58, 42 53"
+              stroke="#C19A4B" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="knot-line"></div>
+    <div class="cover-label">Владимиру Владимировичу</div>
+    <div class="cover-sub">от Кирилла Москвина · нажмите, чтобы развязать&nbsp;узел</div>
+  </div>
+</div>
+
+<!-- LEFT — karate mae-geri from Tenor -->
+<div class="fighter-side left" id="decoLeft">
+  <div class="tenor-gif-embed" data-postid="15946631" data-share-method="host" data-aspect-ratio="1.09589" data-width="140px">
+    <a href="https://tenor.com/view/karate-kick-mae-geri-gif-15946631">Karate Kick GIF</a>
+  </div>
+  <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+  <div class="fighter-label">маэ гери</div>
+</div>
+
+<!-- RIGHT — karate kick sticker (mirrored via CSS scaleX(-1)) -->
+<div class="fighter-side right" id="decoRight">
+  <img src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MW5tYWkzN3oxdXd5dW90Mm04M2J3OTN5c2QyeXBmZjh0Nmp5emJkcyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Jjd3tADeayWYyJa0GU/giphy.gif"
+       alt="karate kick" width="280">
+  <div class="fighter-label">сэнсэй</div>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+  <div class="wrap">
+
+    <!-- HERO -->
+    <section class="hero" style="border-top:none;">
+      <div class="eyebrow" id="h-eyebrow">30 июня · день рождения сэнсэя</div>
+      <h1 id="h-title">С днём<br><em>рождения,</em><br>сэнсэй.</h1>
+      <div class="hero-rule" id="h-rule"></div>
+      <p class="lede" id="h-lede">Вы самый добрый и мудрый человек, которого я знаю. Спасибо, что десять лет учите меня не только карате, но и тому, как оставаться светлым человеком.</p>
+      <div class="scroll-cue" id="h-cue"><span>Листайте</span><span class="arrow">↓</span></div>
+    </section>
+
+    <!-- MESSAGE -->
+    <section class="message">
+      <div class="section-tag reveal">Слово ученика</div>
+      <h2 class="reveal d1">Десять лет назад я пришёл на татами<br>и попал не просто в секцию, а к Учителю.</h2>
+      <p class="reveal d2">Владимир Владимирович, за все время вы ни разу не дали повода усомниться: вы один из самых сильных и жизнерадостных людей, которых я встречал. На тренировку к вам идёшь не только за техникой — идёшь за настроением, которое вы умеете создавать одной своей улыбкой ещё до того, как мы встали в строй.</p>
+      <p class="reveal d3">При этом вы по-настоящему мудры. Ваши советы запоминаются не потому, что строгие, а потому что в них всегда есть смысл, прожитый годами, и забота о каждом из нас. Вы умеете и пошутить, и поддержать, и в нужный момент сказать именно то, что нужно услышать.</p>
+      <p class="reveal d4">Спасибо, что все эти годы вы остаётесь таким — добрым, светлым и невероятно мудрым человеком, рядом с которым хочется становиться лучше.</p>
+      <div class="sign reveal d4">— с любовью и благодарностью, ваш ученик Кирилл Москвин</div>
+    </section>
+
+    <!-- LEDGER / FACTS -->
+    <section class="ledger">
+      <div class="section-tag reveal">Путь в карате</div>
+      <h2 class="ledger-title reveal d1">Журнал тренировок длиною в жизнь</h2>
+
+      <div class="ledger-row reveal d2">
+        <div class="ledger-year">6 дан</div>
+        <div class="ledger-body">
+          <strong>Чёрный пояс, шестой дан</strong>
+          <span>Заслуженный тренер, тренер высшей категории — звание, которое не даётся быстро.</span>
+        </div>
+      </div>
+
+      <div class="ledger-row reveal d3">
+        <div class="ledger-year">2016</div>
+        <div class="ledger-body">
+          <strong>Здесь начался мой путь</strong>
+          <span>Год, когда я впервые встал в строй в вашей секции — и не пожалел ни разу.</span>
+        </div>
+      </div>
+
+      <div class="ledger-row reveal d3">
+        <div class="ledger-year">1000+</div>
+        <div class="ledger-body">
+          <strong>Учеников за карьеру</strong>
+          <span>Тысячи людей, которым вы дали больше, чем технику ударов и блоков.</span>
+        </div>
+      </div>
+
+      <div class="ledger-row reveal d4">
+        <div class="ledger-year">∞</div>
+        <div class="ledger-body">
+          <strong>Доброты и хорошего настроения</strong>
+          <span>Единственный показатель, который вы умудряетесь повышать без устали из года в год.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHOTO CAROUSEL -->
+    <section class="photo-section">
+      <div class="section-tag reveal" style="justify-content:center;">На память</div>
+      <div class="reveal d1">
+        <div class="photo-frame">
+          <div class="carousel" id="carousel">
+            <div class="carousel-track" id="carouselTrack">
+              <img src="1.jpg" alt="Фото 1">
+              <img src="2.jpg" alt="Фото 2">
+              <img src="3.jpg" alt="Фото 3">
+            </div>
+            <button class="carousel-btn prev" id="prevBtn">&#8592;</button>
+            <button class="carousel-btn next" id="nextBtn">&#8594;</button>
+          </div>
+          <div class="carousel-dots" id="carouselDots">
+            <span class="active" data-idx="0"></span>
+            <span data-idx="1"></span>
+            <span data-idx="2"></span>
+          </div>
+        </div>
+        <div class="photo-caption">«Каждый снимок — часть моей жизни с вами»</div>
+      </div>
+    </section>
+
+    <!-- CLOSING -->
+    <section class="closing">
+      <svg class="closing-mark reveal" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="19" stroke="#C19A4B" stroke-width="1"/>
+        <circle cx="20" cy="20" r="2" fill="#A8332A"/>
+      </svg>
+      <h2 class="reveal d1">Пусть в новом году вокруг вас будет столько же тепла, доброты и поводов для улыбки, сколько вы дарите каждому из нас на каждой тренировке.</h2>
+      <h2 class="reveal d2" style="margin-top:18px;">С днём рождения, сэнсэй!</h2>
+      <div class="closing-from reveal d3">С любовью и благодарностью — ваш ученик Кирилл Москвин</div>
+    </section>
+
+    <footer>
+      <span>сделано с благодарностью · 30 июня</span>
+    </footer>
+
+  </div>
+</div>
+
+<script>
+  // ---------- cover floating stars ----------
+  (function(){
+    const container = document.getElementById('coverStars');
+    for(let i = 0; i < 28; i++){
+      const s = document.createElement('div');
+      s.className = 'star';
+      s.style.left = (Math.random() * 100) + '%';
+      s.style.top  = (Math.random() * 100) + '%';
+      s.style.setProperty('--d', (2.5 + Math.random() * 3) + 's');
+      s.style.setProperty('--delay', (Math.random() * 4) + 's');
+      const sz = 2 + Math.floor(Math.random() * 4);
+      s.style.width = sz + 'px';
+      s.style.height = sz + 'px';
+      container.appendChild(s);
+    }
+  })();
+
+  // ---------- cover confetti (subtle, before open) ----------
+  (function(){
+    const cvs = document.getElementById('cover-fx');
+    const c = cvs.getContext('2d');
+    cvs.width = window.innerWidth;
+    cvs.height = window.innerHeight;
+    window.addEventListener('resize', ()=>{ cvs.width=window.innerWidth; cvs.height=window.innerHeight; });
+
+    const cols = ['#C19A4B','#A8332A','#7A8B6F','#F3EEE3','#e8c97a'];
+    const flakes = Array.from({length:30}, ()=>({
+      x: Math.random()*window.innerWidth,
+      y: Math.random()*window.innerHeight,
+      r: 1.5 + Math.random()*2.5,
+      vx: (Math.random()-0.5)*0.4,
+      vy: 0.3 + Math.random()*0.5,
+      color: cols[Math.floor(Math.random()*cols.length)],
+      alpha: 0.15 + Math.random()*0.35
+    }));
+
+    let running = true;
+    function drawCoverFx(){
+      if(!running) return;
+      c.clearRect(0,0,cvs.width,cvs.height);
+      flakes.forEach(f=>{
+        f.x += f.vx; f.y += f.vy;
+        if(f.y > cvs.height + 5){ f.y = -5; f.x = Math.random()*cvs.width; }
+        c.globalAlpha = f.alpha;
+        c.fillStyle = f.color;
+        c.beginPath();
+        c.arc(f.x,f.y,f.r,0,Math.PI*2);
+        c.fill();
+      });
+      c.globalAlpha = 1;
+      requestAnimationFrame(drawCoverFx);
+    }
+    drawCoverFx();
+
+    window._stopCoverFx = ()=>{ running = false; c.clearRect(0,0,cvs.width,cvs.height); };
+  })();
+
+  // ---------- cover open ----------
+  const cover = document.getElementById('cover');
+  const content = document.getElementById('content');
+  let opened = false;
+
+  function openCard(){
+    if(opened) return;
+    opened = true;
+    cover.classList.add('hide');
+    content.classList.add('show');
+    if(window._stopCoverFx) window._stopCoverFx();
+    burstParticles();
+    animateHero();
+    document.getElementById('decoLeft').classList.add('show');
+    document.getElementById('decoRight').classList.add('show');
+    document.getElementById('logoLeft').classList.add('show');
+    document.getElementById('logoRight').classList.add('show');
+    document.body.style.overflow = 'auto';
+  }
+
+  cover.addEventListener('click', openCard);
+  cover.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') openCard(); });
+  cover.setAttribute('tabindex','0');
+
+  document.body.style.overflow = 'hidden';
+
+  // ---------- hero entrance ----------
+  function animateHero(){
+    const els = [
+      {id:'h-eyebrow', delay:80},
+      {id:'h-title', delay:200},
+      {id:'h-rule', delay:520},
+      {id:'h-lede', delay:620},
+      {id:'h-cue', delay:900}
+    ];
+    els.forEach(({id, delay})=>{
+      const el = document.getElementById(id);
+      setTimeout(()=>{
+        el.style.transition = 'opacity 0.9s cubic-bezier(.2,.6,.2,1), transform 0.9s cubic-bezier(.2,.6,.2,1)';
+        el.style.opacity = '1';
+        el.style.transform = id==='h-rule' ? 'scaleX(1)' : 'translateY(0)';
+      }, delay);
+    });
+  }
+
+  // ---------- scroll reveal ----------
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+  revealEls.forEach(el=>io.observe(el));
+
+  // ---------- particle burst (ink/ember style, not party confetti) ----------
+  const canvas = document.getElementById('fx');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  const palette = ['#A8332A', '#C19A4B', '#7A8B6F', '#F3EEE3'];
+
+  function burstParticles(){
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    for(let i=0;i<70;i++){
+      const angle = Math.random()*Math.PI*2;
+      const speed = 2 + Math.random()*6;
+      particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed - 2,
+        size: 3 + Math.random()*4,
+        rot: Math.random()*360,
+        vrot: (Math.random()-0.5)*10,
+        color: palette[Math.floor(Math.random()*palette.length)],
+        life: 1,
+        decay: 0.006 + Math.random()*0.01,
+        shape: Math.random() > 0.5 ? 'rect' : 'circle'
+      });
+    }
+  }
+
+  function tick(){
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    particles.forEach(p=>{
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.07; // gravity
+      p.vx *= 0.99;
+      p.rot += p.vrot;
+      p.life -= p.decay;
+    });
+    particles = particles.filter(p=>p.life > 0);
+
+    particles.forEach(p=>{
+      ctx.save();
+      ctx.globalAlpha = Math.max(p.life, 0);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI/180);
+      ctx.fillStyle = p.color;
+      if(p.shape === 'rect'){
+        ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.5);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0,0,p.size/2,0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  // ---------- carousel ----------
+  (function(){
+    const track = document.getElementById('carouselTrack');
+    const dots  = document.querySelectorAll('#carouselDots span');
+    let cur = 0;
+    const total = 3;
+
+    function goTo(idx){
+      cur = (idx + total) % total;
+      track.style.transform = `translateX(-${cur * 100}%)`;
+      dots.forEach((d, i) => d.classList.toggle('active', i === cur));
+    }
+
+    document.getElementById('prevBtn').addEventListener('click', () => goTo(cur - 1));
+    document.getElementById('nextBtn').addEventListener('click', () => goTo(cur + 1));
+    dots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.idx)));
+
+    // auto-advance every 4s
+    setInterval(() => goTo(cur + 1), 4000);
+  })();
+</script>
+
+</body>
+</html>
