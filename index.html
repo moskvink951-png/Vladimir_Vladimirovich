@@ -321,12 +321,21 @@
   }
 
   @media (max-width:900px){
-    .fighter-side.left{ left:4px; }
-    .fighter-side.right{ right:0px; }
-    .fighter-side img{ width:80px !important; }
-    .fighter-side.right img{ width:140px !important; }
-    .fighter-label{ display:none; }
+    .fighter-side{ display:none; }
+    #mobile-fighters{ display:flex !important; }
   }
+
+  #mobile-fighters{
+    display:none;
+    justify-content:center; align-items:flex-end; gap:24px;
+    padding:24px 0 8px;
+    pointer-events:none;
+  }
+  #mobile-fighters img{
+    width:90px;
+    filter: drop-shadow(0 0 8px rgba(193,154,75,0.25));
+  }
+  #mobile-fighters img.flip{ transform: scaleX(-1); }
 
   /* ---- corner logos ---- */
   .corner-logo{
@@ -526,6 +535,12 @@
       <h2 class="reveal d2" style="margin-top:18px;">С днём рождения, сэнсэй!</h2>
       <div class="closing-from reveal d3">С любовью и благодарностью — ваш ученик Кирилл Москвин</div>
     </section>
+
+    <!-- mobile fighters row -->
+    <div id="mobile-fighters">
+      <img src="https://media1.giphy.com/media/QBjW9gaifJG009LXjh/giphy.gif" alt="karate">
+      <img src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MW5tYWkzN3oxdXd5dW90Mm04M2J3OTN5c2QyeXBmZjh0Nmp5emJkcyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Jjd3tADeayWYyJa0GU/giphy.gif" alt="karate" class="flip">
+    </div>
 
     <footer>
       <span>сделано с благодарностью · 30 июня</span>
